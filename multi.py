@@ -952,7 +952,7 @@ def main():
     st.title("🚨 AWS監視システム")
     st.markdown("### Amazon Bedrock マルチエージェントによる協調分析システム")
     
-    st.info(f"Bedrock エージェント接続: ID={BEDROCK_AGENT_ID}, エイリアスID={BEDROCK_AGENT_ALIAS_ID}")
+    
     
     # アラーム取得
     if st.session_state.clients and "cloudwatch" in st.session_state.clients:
