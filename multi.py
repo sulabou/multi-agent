@@ -342,54 +342,7 @@ def initialize_session():
     if "analysis_summary" not in st.session_state:
         st.session_state.analysis_summary = {}
 
-def initialize_session():
-    """セッション状態の初期化"""
-    if "session_id" not in st.session_state:
-        st.session_state.session_id = str(uuid.uuid4())
-    
-    if "agent_responses" not in st.session_state:
-        st.session_state.agent_responses = {}
-        
-    if "analysis_complete" not in st.session_state:
-        st.session_state.analysis_complete = False
-        
-    if "show_details" not in st.session_state:
-        st.session_state.show_details = {}
-        
-    # リージョン設定
-    region = st.sidebar.selectbox(
-        "AWSリージョン", 
-        ["us-east-1", "us-east-2", "us-west-1", "us-west-2", "ap-northeast-1"], 
-        index=3
-    )
-    
-    # AWS クライアント初期化
-    if "clients" not in st.session_state:
-        try:
-            st.session_state.clients = {
-                "cloudwatch": boto3.client("cloudwatch", region_name=region),
-                "bedrock_agent": boto3.client("bedrock-agent-runtime", region_name=region)
-            }
-            st.sidebar.success("AWS接続成功")
-        except Exception as e:
-            st.sidebar.error(f"AWS接続エラー: {str(e)}")
-            st.session_state.clients = None
-            
-    # その他の初期化
-    if "alarms" not in st.session_state:
-        st.session_state.alarms = []
-        
-    if "selected_alarm" not in st.session_state:
-        st.session_state.selected_alarm = None
-        
-    if "last_refresh" not in st.session_state:
-        st.session_state.last_refresh = datetime.now()
-        
-    if "agent_conversations" not in st.session_state:
-        st.session_state.agent_conversations = []
-        
-    if "analysis_summary" not in st.session_state:
-        st.session_state.analysis_summary = {}
+
 
 def get_active_alarms(client):
     """CloudWatchから有効なアラームを取得"""
