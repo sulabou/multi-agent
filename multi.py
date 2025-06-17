@@ -252,6 +252,97 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 def initialize_session():
+    """セッション状態の初期化（シークレット対応版）"""
+    if "session_id" not in st.session_state:
+        st.session_state.session_id = str(uuid.uuid4())
+    
+    if "agent_responses" not in st.session_state:
+        st.session_state.agent_responses = {}
+        
+    if "analysis_complete" not in st.session_state:
+        st.session_state.analysis_complete = False
+        
+    if "show_details" not in st.session_state:
+        st.session_state.show_details = {}
+        
+    # リージョン設定
+    region = st.sidebar.selectbox(
+        "AWSリージョン", 
+        ["us-east-1", "us-east-2", "us-west-1", "us-west-2", "ap-northeast-1"], 
+        index=3
+    )
+    
+    # AWS クライアント初期化（シークレット対応）
+    if "clients" not in st.session_state:
+        try:
+            # Streamlit Cloudのシークレットをチェック
+            if hasattr(st, 'secrets') and "AWS" in st.secrets:
+                # シークレットから認証情報を取得
+                aws_access_key_id = st.secrets["AWS"]["AWS_ACCESS_KEY_ID"]
+                aws_secret_access_key = st.secrets["AWS"]["AWS_SECRET_ACCESS_KEY"]
+                aws_region = st.secrets["AWS"].get("AWS_DEFAULT_REGION", region)
+                
+                st.session_state.clients = {
+                    "cloudwatch": boto3.client(
+                        "cloudwatch", 
+                        region_name=aws_region,
+                        aws_access_key_id=aws_access_key_id,
+                        aws_secret_access_key=aws_secret_access_key
+                    ),
+                    "bedrock_agent": boto3.client(
+                        "bedrock-agent-runtime", 
+                        region_name=aws_region,
+                        aws_access_key_id=aws_access_key_id,
+                        aws_secret_access_key=aws_secret_access_key
+                    )
+                }
+                st.sidebar.success("AWS接続成功（シークレット使用）")
+            else:
+                # ローカル環境では既存の方法を使用
+                st.session_state.clients = {
+                    "cloudwatch": boto3.client("cloudwatch", region_name=region),
+                    "bedrock_agent": boto3.client("bedrock-agent-runtime", region_name=region)
+                }
+                st.sidebar.success("AWS接続成功（ローカル認証）")
+                
+        except Exception as e:
+            st.sidebar.error(f"AWS接続エラー: {str(e)}")
+            # デバッグ情報を追加
+            if hasattr(st, 'secrets'):
+                if "AWS" in st.secrets:
+                    st.sidebar.info("シークレットは設定されています")
+                    # キーの存在確認（値は表示しない）
+                    keys_present = []
+                    if "AWS_ACCESS_KEY_ID" in st.secrets["AWS"]:
+                        keys_present.append("ACCESS_KEY_ID")
+                    if "AWS_SECRET_ACCESS_KEY" in st.secrets["AWS"]:
+                        keys_present.append("SECRET_ACCESS_KEY")
+                    if "AWS_DEFAULT_REGION" in st.secrets["AWS"]:
+                        keys_present.append("DEFAULT_REGION")
+                    st.sidebar.info(f"設定済みキー: {', '.join(keys_present)}")
+                else:
+                    st.sidebar.warning("シークレットにAWSセクションが見つかりません")
+            else:
+                st.sidebar.warning("シークレットが利用できません")
+            st.session_state.clients = None
+            
+    # その他の初期化
+    if "alarms" not in st.session_state:
+        st.session_state.alarms = []
+        
+    if "selected_alarm" not in st.session_state:
+        st.session_state.selected_alarm = None
+        
+    if "last_refresh" not in st.session_state:
+        st.session_state.last_refresh = datetime.now()
+        
+    if "agent_conversations" not in st.session_state:
+        st.session_state.agent_conversations = []
+        
+    if "analysis_summary" not in st.session_state:
+        st.session_state.analysis_summary = {}
+
+def initialize_session():
     """セッション状態の初期化"""
     if "session_id" not in st.session_state:
         st.session_state.session_id = str(uuid.uuid4())
