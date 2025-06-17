@@ -19,25 +19,6 @@ st.set_page_config(
 )
 
 
-# デバッグ情報
-st.sidebar.write("Python version:", sys.version)
-
-try:
-    import boto3
-    st.sidebar.success("boto3 imported successfully")
-except ImportError as e:
-    st.sidebar.error(f"boto3 import error: {e}")
-    try:
-        st.sidebar.info("Attempting to install boto3...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "boto3"])
-        import boto3
-        st.sidebar.success("boto3 installed successfully!")
-    except Exception as e:
-        st.sidebar.error(f"Failed to install boto3: {e}")
-
-
-
-
 
 # Bedrock エージェント設定
 BEDROCK_AGENT_ID = "8VZ0IXID7B"
