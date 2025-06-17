@@ -11,11 +11,13 @@ import re
 import sys
 import subprocess
 
+# ページ設定
 st.set_page_config(
     layout="wide", 
     page_title="AWS監視システム - 日本語版", 
     initial_sidebar_state="expanded"
 )
+
 
 # デバッグ情報
 st.sidebar.write("Python version:", sys.version)
@@ -36,12 +38,6 @@ except ImportError as e:
 
 
 
-# ページ設定
-st.set_page_config(
-    layout="wide", 
-    page_title="AWS監視システム - 日本語版", 
-    initial_sidebar_state="expanded"
-)
 
 # Bedrock エージェント設定
 BEDROCK_AGENT_ID = "8VZ0IXID7B"
