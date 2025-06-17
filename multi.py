@@ -14,7 +14,7 @@ import subprocess
 # ページ設定
 st.set_page_config(
     layout="wide", 
-    page_title="AWS監視システム - 日本語版", 
+    page_title="AWS監視システム", 
     initial_sidebar_state="expanded"
 )
 
@@ -905,7 +905,7 @@ def main():
     """メイン関数"""
     initialize_session()
     
-    st.title("🚨 AWS監視システム - 日本語版")
+    st.title("🚨 AWS監視システム")
     st.markdown("### Amazon Bedrock マルチエージェントによる協調分析システム")
     
     st.info(f"Bedrock エージェント接続: ID={BEDROCK_AGENT_ID}, エイリアスID={BEDROCK_AGENT_ALIAS_ID}")
