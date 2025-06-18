@@ -535,10 +535,31 @@ def display_agent_conversations():
             icon = AGENTS[agent_name]["icon"]
         else:
             icon = "🤖"
-    st.markdown(f"- {icon} **{agent_name}**: {count}件のメッセージ")
+        st.markdown(f"- {icon} **{agent_name}**: {count}件のメッセージ")
     # 詳細な会話を折りたたみ可能なexpanderで表示
     with st.expander("💬 エージェント会話の詳細", expanded=False):
-        # 詳細な会話表示のコード
+        st.markdown('<div class="conversation-compact">', unsafe_allow_html=True)
+        for i, conversation in enumerate(st.session_state.agent_conversations):
+            agent_name = conversation.get("agent", "不明なエージェント")
+            message = conversation.get("message", "")
+            # 空のメッセージや短すぎるメッセージのみスキップ
+            if not message or len(message.strip()) < 10:
+                continue
+            agent_class = f"agent{(i % 3) + 1}"
+            if agent_name in AGENTS:
+                agent = AGENTS[agent_name]
+                icon = agent.get("icon", "🤖")
+            else:
+                icon = "🤖"
+            message = message.replace(". ", "。")
+            st.markdown(f"""
+<div class="agent-message {agent_class}">
+<div class="agent-name">{icon} {agent_name}</div>
+<div class="conversation-content" style="white-space: pre-line;">{message}</div>
+</div>
+            """, unsafe_allow_html=True)
+            st.markdown("<div style='height: 10px;'></div>", unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
 
 def create_agent_prompt_from_alarm(alarm_data):
     """アラームデータからエージェントプロンプトを生成"""
