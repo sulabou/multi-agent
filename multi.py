@@ -1159,6 +1159,10 @@ def main():
                     display_analysis_summary(st.session_state.analysis_summary)
                 
                 display_agent_conversations()
+
+                if st.session_state.aws_qa_response:
+                    with st.expander("💡 AWS-QA エージェントの回答", expanded=True):
+                        st.markdown(st.session_state.aws_qa_response)
                 
                 if "Bedrock分析結果" in st.session_state.agent_responses:
                     with st.expander("📝 詳細分析レポート", expanded=False):
