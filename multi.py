@@ -535,7 +535,7 @@ def display_agent_conversations():
             icon = AGENTS[agent_name]["icon"]
         else:
             icon = "🤖"
-        st.markdown(f"- {icon} **{agent_name}**: {count}件のメッセージ")
+    st.markdown(f"- {icon} **{agent_name}**: {count}件のメッセージ")
     # 詳細な会話を折りたたみ可能なexpanderで表示
     with st.expander("💬 エージェント会話の詳細", expanded=False):
         # 詳細な会話表示のコード
