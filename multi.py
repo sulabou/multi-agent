@@ -1200,8 +1200,8 @@ def main():
             st.info("💭 質問をお待ちしています")
         
         with st.expander("⚙️ Bedrock設定", expanded=False):
-        agent_id = st.text_input("Bedrock Agent ID", value=st.session_state.get("bedrock_config", {}).get("agent_id", BEDROCK_AGENT_ID))
-        agent_alias_id = st.text_input("Bedrock Agent Alias ID", value=st.session_state.get("bedrock_config", {}).get("agent_alias_id", BEDROCK_AGENT_ALIAS_ID))
+            agent_id = st.text_input("Bedrock Agent ID", value=st.session_state.get("bedrock_config", {}).get("agent_id", BEDROCK_AGENT_ID))
+            agent_alias_id = st.text_input("Bedrock Agent Alias ID", value=st.session_state.get("bedrock_config", {}).get("agent_alias_id", BEDROCK_AGENT_ALIAS_ID))
         
         if st.button("設定を保存", key="save_bedrock_settings"):
             st.session_state.bedrock_config = {}
