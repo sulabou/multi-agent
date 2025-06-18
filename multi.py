@@ -1075,13 +1075,8 @@ def display_aws_qa_section():
     
     # 最新の回答を表示
     if st.session_state.aws_qa_response:
-        st.markdown("""
-        <div class="aws-qa-response">
-            <h4 style="color: #2c5aa0; margin-bottom: 15px;">💡 AWS-QA エージェントの回答</h4>
-        </div>
-        """, unsafe_allow_html=True)
-        
-        st.markdown(st.session_state.aws_qa_response)
+                    with st.expander("💡 AWS-QA エージェントの回答", expanded=True):
+                        st.markdown(st.session_state.aws_qa_response)
     
     # 質問履歴を表示
     if st.session_state.aws_qa_history:
@@ -1160,9 +1155,7 @@ def main():
                 
                 display_agent_conversations()
 
-                if st.session_state.aws_qa_response:
-                    with st.expander("💡 AWS-QA エージェントの回答", expanded=True):
-                        st.markdown(st.session_state.aws_qa_response)
+                
                 
                 if "Bedrock分析結果" in st.session_state.agent_responses:
                     with st.expander("📝 詳細分析レポート", expanded=False):
