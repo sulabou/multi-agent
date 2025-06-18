@@ -1075,7 +1075,7 @@ def display_aws_qa_section():
     
     # 最新の回答を表示
     if st.session_state.aws_qa_response:
-                    with st.expander("💡 AWS-QA エージェントの回答", expanded=True):
+                    with st.expander("💡 AWS-QA エージェントの回答", expanded=False):
                         st.markdown(st.session_state.aws_qa_response)
     
     # 質問履歴を表示
