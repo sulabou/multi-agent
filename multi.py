@@ -1206,14 +1206,14 @@ def main():
         with st.expander("⚙️ Bedrock設定", expanded=False):
             agent_id = st.text_input("Bedrock Agent ID", value=st.session_state.get("bedrock_config", {}).get("agent_id", BEDROCK_AGENT_ID))
             agent_alias_id = st.text_input("Bedrock Agent Alias ID", value=st.session_state.get("bedrock_config", {}).get("agent_alias_id", BEDROCK_AGENT_ALIAS_ID))
-        
-        if st.button("設定を保存", key="save_bedrock_settings"):
-            st.session_state.bedrock_config = {}
-            st.session_state.bedrock_config["agent_id"] = agent_id
-            st.session_state.bedrock_config["agent_alias_id"] = agent_alias_id
-            st.success("Bedrock設定を保存しました")
-            time.sleep(1)
-            st.rerun()
+           
+            if st.button("設定を保存", key="save_bedrock_settings"):
+                st.session_state.bedrock_config = {}
+                st.session_state.bedrock_config["agent_id"] = agent_id
+                st.session_state.bedrock_config["agent_alias_id"] = agent_alias_id
+                st.success("Bedrock設定を保存しました")
+                time.sleep(1)
+                st.rerun()
         
         if st.button("🔄 システムリセット"):
             for key in list(st.session_state.keys()):
