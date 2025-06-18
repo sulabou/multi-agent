@@ -18,8 +18,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-
-
 # Bedrock エージェント設定
 BEDROCK_AGENT_ID = "8VZ0IXID7B"
 BEDROCK_AGENT_ALIAS_ID = "ODSLAX1DR8"
@@ -248,6 +246,51 @@ st.markdown("""
         margin: 0.8em 0 0.4em 0 !important;
         line-height: 1.3 !important;
     }
+    
+    .aws-qa-section {
+        background: linear-gradient(135deg, #e8f4fd 0%, #d1ecf1 100%);
+        border-radius: 20px;
+        padding: 30px;
+        margin: 30px 0;
+        border: 2px solid #4a90e2;
+        box-shadow: 0 10px 25px rgba(74, 144, 226, 0.15);
+    }
+    
+    .aws-qa-title {
+        color: #2c5aa0;
+        font-size: 1.5em;
+        font-weight: 600;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .aws-qa-input {
+        width: 100%;
+        padding: 15px 20px;
+        border: 2px solid #4a90e2;
+        border-radius: 15px;
+        font-size: 1.1em;
+        background: white;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .aws-qa-input:focus {
+        outline: none;
+        border-color: #2c5aa0;
+        box-shadow: 0 6px 15px rgba(74, 144, 226, 0.3);
+    }
+    
+    .aws-qa-response {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        margin-top: 20px;
+        border-left: 4px solid #4a90e2;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
 </style>
 """, unsafe_allow_html=True)
 
@@ -264,6 +307,16 @@ def initialize_session():
         
     if "show_details" not in st.session_state:
         st.session_state.show_details = {}
+        
+    # AWS-QA関連のセッション状態を初期化
+    if "aws_qa_question" not in st.session_state:
+        st.session_state.aws_qa_question = ""
+        
+    if "aws_qa_response" not in st.session_state:
+        st.session_state.aws_qa_response = ""
+        
+    if "aws_qa_history" not in st.session_state:
+        st.session_state.aws_qa_history = []
         
     # リージョン設定
     region = st.sidebar.selectbox(
@@ -341,8 +394,6 @@ def initialize_session():
         
     if "analysis_summary" not in st.session_state:
         st.session_state.analysis_summary = {}
-
-
 
 def get_active_alarms(client):
     """CloudWatchから有効なアラームを取得"""
@@ -483,10 +534,6 @@ def display_agent_conversations():
                 agent_name = conversation.get("agent", "不明なエージェント")
                 message = conversation.get("message", "")
                 
-                # メインエージェントの英語メッセージをスキップする条件を削除
-                # if agent_name == "メインエージェント" and any(english_word in message for english_word in ["CloudWatch", "alarm", "analyze", "following"]):
-                #     continue
-
                 # 代わりに、空のメッセージや短すぎるメッセージのみスキップ
                 if not message or len(message.strip()) < 10:
                     continue
@@ -539,6 +586,21 @@ CloudWatchアラート:
 
 技術的な詳細を含めて回答してください。AWS運用チームへの報告書として使用できるような包括的な分析を提供してください。
 回答は日本語でお願いします。"""
+
+def create_aws_qa_prompt(question):
+    """AWS-QA専用のプロンプトを生成"""
+    return f"""AWS関連の質問に対して、専門的で詳細な回答を提供してください。
+
+質問: {question}
+
+以下の観点から回答してください：
+1. 技術的な詳細と背景
+2. ベストプラクティス
+3. 注意点やリスク
+4. 実装例や設定方法（該当する場合）
+5. 関連するAWSサービスとの連携
+
+回答は日本語で、AWS運用担当者が理解しやすい形で提供してください。"""
 
 def invoke_bedrock_agent(client, session_id, prompt):
     """Bedrockエージェントを呼び出す"""
@@ -945,14 +1007,113 @@ def analyze_with_bedrock(alarm):
     
     return False
 
+def handle_aws_qa_question(question):
+    """AWS-QA質問を処理"""
+    if not st.session_state.clients or "bedrock_agent" not in st.session_state.clients:
+        st.error("Bedrock接続が確立されていません")
+        return False
+    
+    prompt = create_aws_qa_prompt(question)
+    
+    with st.spinner("AWS-QAエージェントが回答を生成中..."):
+        response = invoke_bedrock_agent(
+            st.session_state.clients["bedrock_agent"],
+            st.session_state.session_id + "_aws_qa",  # 別のセッションIDを使用
+            prompt
+        )
+        
+        if response:
+            answer_parts = []
+            for event in response.get("completion", []):
+                if "chunk" in event:
+                    chunk = event["chunk"]["bytes"].decode()
+                    answer_parts.append(chunk)
+            
+            final_response = "".join(answer_parts)
+            
+            if final_response:
+                # 履歴に追加
+                st.session_state.aws_qa_history.append({
+                    "question": question,
+                    "answer": final_response,
+                    "timestamp": datetime.now()
+                })
+                
+                st.session_state.aws_qa_response = final_response
+                return True
+    
+    return False
+
+def display_aws_qa_section():
+    """AWS-QA専用セクションを表示"""
+    st.markdown("""
+    <div class="aws-qa-section">
+        <div class="aws-qa-title">
+            🤖 AWS-QA エージェント
+            <span style="font-size: 0.8em; font-weight: normal; color: #666;">AWS関連の質問にお答えします</span>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # 質問入力フォーム
+    with st.form("aws_qa_form", clear_on_submit=True):
+        question = st.text_area(
+            "",
+            placeholder="質問をどうぞ",
+            height=100,
+            key="aws_qa_input",
+            help="AWS関連の技術的な質問、ベストプラクティス、トラブルシューティングなど、何でもお聞きください。"
+        )
+        
+        col1, col2, col3 = st.columns([1, 1, 4])
+        with col1:
+            submit_button = st.form_submit_button("質問する", type="primary")
+        with col2:
+            clear_button = st.form_submit_button("履歴をクリア")
+    
+    # 質問処理
+    if submit_button and question.strip():
+        success = handle_aws_qa_question(question.strip())
+        if success:
+            st.rerun()
+    
+    # 履歴クリア処理
+    if clear_button:
+        st.session_state.aws_qa_history = []
+        st.session_state.aws_qa_response = ""
+        st.success("履歴をクリアしました")
+        st.rerun()
+    
+    # 最新の回答を表示
+    if st.session_state.aws_qa_response:
+        st.markdown("""
+        <div class="aws-qa-response">
+            <h4 style="color: #2c5aa0; margin-bottom: 15px;">💡 AWS-QA エージェントの回答</h4>
+        </div>
+        """, unsafe_allow_html=True)
+        
+        st.markdown(st.session_state.aws_qa_response)
+    
+    # 質問履歴を表示
+    if st.session_state.aws_qa_history:
+        with st.expander(f"📚 質問履歴 ({len(st.session_state.aws_qa_history)}件)", expanded=False):
+            for i, item in enumerate(reversed(st.session_state.aws_qa_history[-5:])):  # 最新5件のみ表示
+                st.markdown(f"""
+                **質問 {len(st.session_state.aws_qa_history) - i}:** {item['question']}
+                
+                **回答:** {item['answer'][:200]}{'...' if len(item['answer']) > 200 else ''}
+                
+                *{item['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}*
+                
+                ---
+                """)
+
 def main():
     """メイン関数"""
     initialize_session()
     
     st.title("🚨 AWS監視システム")
     st.markdown("### Amazon Bedrock マルチエージェントによる協調分析システム")
-    
-    
     
     # アラーム取得
     if st.session_state.clients and "cloudwatch" in st.session_state.clients:
@@ -1015,6 +1176,10 @@ def main():
                         st.markdown(st.session_state.agent_responses["Bedrock分析結果"])
     else:
         display_no_alarms_message()
+    
+    # AWS-QA専用セクションを下部に追加
+    st.markdown("---")
+    display_aws_qa_section()
 
     # サイドバー
     with st.sidebar:
@@ -1037,6 +1202,13 @@ def main():
             st.success("✅ 分析完了")
         else:
             st.warning("⏳ 分析待機中")
+        
+        # AWS-QA状況を追加
+        st.markdown("### 🤖 AWS-QA状況")
+        if st.session_state.aws_qa_history:
+            st.info(f"📚 質問履歴: {len(st.session_state.aws_qa_history)}件")
+        else:
+            st.info("💭 質問をお待ちしています")
         
         st.markdown("### ⚙️ Bedrock設定")
         agent_id = st.text_input("Bedrock Agent ID", value=st.session_state.get("bedrock_config", {}).get("agent_id", BEDROCK_AGENT_ID))
