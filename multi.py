@@ -977,12 +977,15 @@ def display_alarm_selection(alarms):
             elif 'DynamoDB' in namespace:
                 service = "DynamoDB"
         alarm_options.append(f"{alarm_name} ({service})")
-        
+    
+    # この部分が足りていない
+    selected_index = st.selectbox(
         "分析するアラームを選択:",
         range(len(alarm_options)),
         format_func=lambda i: alarm_options[i],
         index=0  # デフォルトで最初のオプション（"アラームを選択してください..."）を選択
     )
+    
     # インデックス0（デフォルトオプション）が選択された場合はNoneを返す
     if selected_index == 0:
         return None, None
@@ -1144,7 +1147,6 @@ def display_aws_qa_section():
 def main():
     """メイン関数"""
     initialize_session()
-    selected_alarm = display_alarm_selection(st.session_state.alarms)
     st.title("🚨 AWS監視システム")
     st.markdown("### Amazon Bedrock マルチエージェントによる協調分析システム")
     
