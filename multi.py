@@ -1113,7 +1113,7 @@ def main():
                         st.error(f"アラーム取得エラー: {str(e)}")
         
         with col1:
-            st.caption(f"最終更新: {st.session_state.last_refresh.strftime('%Y-%m-%d %H+9:%M:%S')}")
+            st.caption(f"最終更新: {st.session_state.last_refresh.strftime('%Y-%m-%d %(H+9):%M:%S')}")
         
         if not st.session_state.alarms:
             try:
