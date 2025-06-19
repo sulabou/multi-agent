@@ -1182,6 +1182,10 @@ def main():
                     st.session_state.alarms = get_active_alarms(st.session_state.clients["cloudwatch"])
             except Exception as e:
                 st.error(f"アラーム取得エラー: {str(e)}")
+    # アラームの選択UIコード
+    selected_alarm = st.selectbox(...) 
+    # インデックスを取得
+    selected_index = st.session_state.alarms.index(selected_alarm) if selected_alarm in st.session_state.alarms else None
     
     # アラーム処理
     if st.session_state.alarms:
