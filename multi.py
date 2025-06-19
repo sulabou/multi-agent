@@ -440,19 +440,19 @@ def get_metric_data(client, namespace, metric_name, dimensions, start_time, end_
                 jst = pytz.timezone('Asia/Tokyo')
                 jst_timestamps = []
         
-            for ts in timestamps:
+                for ts in timestamps:
             # タイムゾーン情報がない場合はUTCとして扱う
-                if ts.tzinfo is None:
-                    ts = ts.replace(tzinfo=timezone.utc)
+                   if ts.tzinfo is None:
+                       ts = ts.replace(tzinfo=timezone.utc)
             # 日本時間に変換
-                jst_ts = ts.astimezone(jst)
-                jst_timestamps.append(jst_ts)
+                   jst_ts = ts.astimezone(jst)
+                   jst_timestamps.append(jst_ts)
         
         # 日本時間のタイムスタンプでデータフレームを作成
-            return pd.DataFrame({
-                'timestamp': jst_timestamps,
-                'value': values
-        })
+                return pd.DataFrame({
+                   'timestamp': jst_timestamps,
+                   'value': values
+                })
     except Exception as e:
         st.error(f"メトリックデータの取得に失敗しました: {str(e)}")
         return None
