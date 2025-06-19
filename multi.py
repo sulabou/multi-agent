@@ -1117,7 +1117,7 @@ def main():
 
             jst = pytz.timezone('Asia/Tokyo')
             japan_time = st.session_state.last_refresh.astimezone(jst)
-            st.caption(f"最終更新: {st.session_state.last_refresh.strftime('%Y-%m-%d %H:%M:%S')} (JST)")
+            st.caption(f"最終更新: {japan_time.strftime('%Y-%m-%d %H:%M:%S')} (JST)")
         
         if not st.session_state.alarms:
             try:
