@@ -1228,9 +1228,12 @@ def main():
                 if "Bedrock分析結果" in st.session_state.agent_responses:
                     with st.expander("📝 詳細分析レポート", expanded=False):
                         st.markdown(st.session_state.agent_responses["Bedrock分析結果"])
-    else:
+        else:
         # アラームが選択されていない場合のメッセージ表示（この部分が追加）
-        display_alarm_selection_message()
+             display_alarm_selection_message()
+    else:
+        display_no_alarms_message()
+
     
     # AWS-QA専用セクションを下部に追加
     st.markdown("---")
