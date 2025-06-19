@@ -427,10 +427,10 @@ def get_metric_data(client, namespace, metric_name, dimensions, start_time, end_
             StartTime=start_time,
             EndTime=end_time
         )
-        if 'MetricDataResults' in response and len(response['MetricDataResults']) > 0:
-    result = response['MetricDataResults'][0]
-    timestamps = result.get('Timestamps', [])
-    values = result.get('Values', [])
+    if 'MetricDataResults' in response and len(response['MetricDataResults']) > 0:
+        result = response['MetricDataResults'][0]
+        timestamps = result.get('Timestamps', [])
+        values = result.get('Values', [])
     
     if timestamps and values:
         # タイムスタンプを日本時間に変換
