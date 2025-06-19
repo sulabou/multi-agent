@@ -59,6 +59,15 @@ st.markdown("""
         margin: 20px 0;
         box-shadow: 0 15px 35px rgba(255, 107, 107, 0.3);
     }
+
+    .alarm-selection-message {
+        background: linear-gradient(135deg, #e3f2fd 0%, #bbdefb 100%);
+        border-radius: 15px;
+        padding: 30px;
+        text-align: center;
+        margin: 20px 0;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+    }
     
     .agent-status-thinking {
         background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
@@ -308,6 +317,9 @@ def initialize_session():
         
     if "show_details" not in st.session_state:
         st.session_state.show_details = {}
+        
+    if "selected_alarm_index" not in st.session_state:
+        st.session_state.selected_alarm_index = None
         
     # AWS-QA関連のセッション状態を初期化
     if "aws_qa_question" not in st.session_state:
@@ -945,11 +957,10 @@ def convert_cloudwatch_alarm_to_display_format(alarm):
     }
 
 def display_alarm_selection(alarms):
-    """アラーム選択UI"""
+    """アラーム選択UI（修正版）"""
     if not alarms:
-        return None
-        
-    alarm_options = []
+        return None, None
+    alarm_options = ["アラームを選択してください..."]  # デフォルトオプションを追加
     for i, alarm in enumerate(alarms):
         alarm_name = alarm.get('AlarmName', f'アラーム {i+1}')
         service = "その他"
@@ -966,15 +977,19 @@ def display_alarm_selection(alarms):
             elif 'DynamoDB' in namespace:
                 service = "DynamoDB"
         alarm_options.append(f"{alarm_name} ({service})")
-    
     selected_index = st.selectbox(
         "分析するアラームを選択:",
         range(len(alarm_options)),
-        format_func=lambda i: alarm_options[i]
+        format_func=lambda i: alarm_options[i],
+        index=0  # デフォルトで最初のオプション（"アラームを選択してください..."）を選択
     )
+    # インデックス0（デフォルトオプション）が選択された場合はNoneを返す
+    if selected_index == 0:
+        return None, None
+    # 実際のアラームのインデックスは selected_index - 1
+    actual_alarm_index = selected_index - 1
+    return alarms[actual_alarm_index], actual_alarm_index
     
-    return alarms[selected_index]
-
 def display_no_alarms_message():
     """アラームがない場合のメッセージ表示"""
     st.markdown("""
@@ -987,6 +1002,20 @@ def display_no_alarms_message():
         <div style="margin-top: 20px; font-size: 4em;">🎉</div>
     </div>
     """, unsafe_allow_html=True)
+
+def display_alarm_selection_message():
+    """アラーム選択待ちのメッセージ表示"""
+    st.markdown("""
+    <div class="alarm-selection-message">
+        <h2 style="color: #1565c0;">📋 アラーム分析システム</h2>
+        <p style="font-size: 1.2em; margin-top: 15px;">
+            上記のドロップダウンメニューから分析したいアラームを選択してください。<br>
+            選択されたアラームの詳細情報と緊急アラートが表示されます。
+        </p>
+        <div style="margin-top: 20px; font-size: 4em;">🔍</div>
+</div>
+    """, unsafe_allow_html=True)
+
 
 def analyze_with_bedrock(alarm):
     """Bedrockを使用してアラームを分析"""
@@ -1125,6 +1154,15 @@ def main():
         with col2:
             if st.button("🔄 更新", key="refresh_alarms"):
                 st.session_state.last_refresh = datetime.now()
+                st.session_state.selected_alarm = None
+                st.session_state.selected_alarm_index = None
+                st.session_state.analysis_complete = False
+                st.session_state.agent_responses = {}
+                st.session_state.agent_conversations = []
+                st.session_state.analysis_summary = {}
+
+
+                
                 with st.spinner("アラーム情報を更新中..."):
                     try:
                         st.session_state.alarms = get_active_alarms(st.session_state.clients["cloudwatch"])
@@ -1149,8 +1187,15 @@ def main():
     if st.session_state.alarms:
         selected_alarm = display_alarm_selection(st.session_state.alarms)
         
-        if selected_alarm:
-            st.session_state.selected_alarm = selected_alarm
+        if selected_alarm is not None:
+        # 新しいアラームが選択された場合、分析状態をリセット（この部分が追加）
+            if (st.session_state.selected_alarm_index != selected_index):
+                st.session_state.selected_alarm = selected_alarm
+                st.session_state.selected_alarm_index = selected_index
+                st.session_state.analysis_complete = False
+                st.session_state.agent_responses = {}
+                st.session_state.agent_conversations = []
+                st.session_state.analysis_summary = {}
             
             alarm_display = convert_cloudwatch_alarm_to_display_format(selected_alarm)
             display_alarm_info(alarm_display)
@@ -1184,7 +1229,8 @@ def main():
                     with st.expander("📝 詳細分析レポート", expanded=False):
                         st.markdown(st.session_state.agent_responses["Bedrock分析結果"])
     else:
-        display_no_alarms_message()
+        # アラームが選択されていない場合のメッセージ表示（この部分が追加）
+        display_alarm_selection_message()
     
     # AWS-QA専用セクションを下部に追加
     st.markdown("---")
