@@ -977,7 +977,7 @@ def display_alarm_selection(alarms):
             elif 'DynamoDB' in namespace:
                 service = "DynamoDB"
         alarm_options.append(f"{alarm_name} ({service})")
-    selected_index = st.selectbox(
+        
         "分析するアラームを選択:",
         range(len(alarm_options)),
         format_func=lambda i: alarm_options[i],
@@ -1186,7 +1186,7 @@ def main():
     # アラーム処理
     if st.session_state.alarms:
         selected_alarm = display_alarm_selection(st.session_state.alarms)
-        
+        st.session_state.selected_alarm_index != selected_index
         if selected_alarm is not None:
         # 新しいアラームが選択された場合、分析状態をリセット（この部分が追加）
             if (st.session_state.selected_alarm_index != selected_index):
