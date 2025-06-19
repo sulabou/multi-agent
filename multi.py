@@ -10,6 +10,7 @@ from botocore.exceptions import ClientError
 import re
 import sys
 import subprocess
+import pytz
 
 # ページ設定
 st.set_page_config(
@@ -1113,7 +1114,7 @@ def main():
                         st.error(f"アラーム取得エラー: {str(e)}")
         
         with col1:
-            st.caption(f"最終更新: {st.session_state.last_refresh.strftime('%Y-%m-%d %(H+9):%M:%S')}")
+            st.caption(f"最終更新: {st.session_state.last_refresh.strftime('%Y-%m-%d %H:%M:%S')} (JST)")
         
         if not st.session_state.alarms:
             try:
