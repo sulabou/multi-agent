@@ -1144,7 +1144,7 @@ def display_aws_qa_section():
 def main():
     """メイン関数"""
     initialize_session()
-    
+    selected_alarm = display_alarm_selection(st.session_state.alarms)
     st.title("🚨 AWS監視システム")
     st.markdown("### Amazon Bedrock マルチエージェントによる協調分析システム")
     
@@ -1185,7 +1185,6 @@ def main():
     
     # アラーム処理
     if st.session_state.alarms:
-        selected_alarm = display_alarm_selection(st.session_state.alarms)
         st.session_state.selected_alarm_index != selected_index
         if selected_alarm is not None:
         # 新しいアラームが選択された場合、分析状態をリセット（この部分が追加）
