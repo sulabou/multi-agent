@@ -443,7 +443,7 @@ def get_metric_data(client, namespace, metric_name, dimensions, start_time, end_
 
 def display_alarm_info(alarm):
     """アラーム情報の表示"""
-    alarm['timestamp_jst'] = alarm['timestamp'].astimezone(jst)
+    
     
     st.markdown(f"""
     <div class="alert-card">
@@ -462,8 +462,10 @@ def display_alarm_info(alarm):
             </div>
             <div style="text-align: right;">
                 <div style="font-size: 4em;">⚠️</div>
+                jst = pytz.timezone('Asia/Tokyo')
+                alarm['timestamp_jst'] = alarm['timestamp'].astimezone(jst)
                 <p style="margin: 5px 0 0 0; color: rgba(255,255,255,0.8); font-size: 0.9em;">
-                    {alarm['timestamp'].strftime('%Y-%m-%d %H:%M:%S')}
+                    {alarm['timestamp_jst'].strftime('%Y-%m-%d %H:%M:%S')}
                 </p>
             </div>
         </div>
