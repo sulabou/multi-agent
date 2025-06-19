@@ -25,12 +25,12 @@ BEDROCK_AGENT_ALIAS_ID = "ODSLAX1DR8"
 
 # エージェント設定
 AGENTS = {
-    "インフラ専門家": {
+    "原因解析エージェント": {
         "icon": "🏗️",
         "color": "#667eea",
         "description": "システム基盤・技術的問題の専門分析"
     },
-    "運用管理専門家": {
+    "対応提案エージェント": {
         "icon": "⚙️", 
         "color": "#f093fb",
         "description": "運用手順・対応策の専門提案"
@@ -645,11 +645,11 @@ def handle_trace_event(event):
     trace = event["trace"]["trace"]["orchestrationTrace"]
     
     agent_display_names = {
-        "infra-expert": "インフラ専門家",
-        "ops-expert": "運用管理専門家", 
+        "infra-expert": "原因解析エージェント",
+        "ops-expert": "対応提案エージェント", 
         "security-expert": "セキュリティ専門家",
-        "test-hirata-hikaku": "インフラ専門家",
-        "test-hirata-v1": "運用管理専門家"
+        "test-hirata-hikaku": "原因解析エージェント",
+        "test-hirata-v1": "対応提案エージェント"
     }
     
     if "invocationInput" in trace:
