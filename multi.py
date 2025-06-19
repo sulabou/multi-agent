@@ -443,9 +443,10 @@ def get_metric_data(client, namespace, metric_name, dimensions, start_time, end_
 
 def display_alarm_info(alarm):
     """アラーム情報の表示"""
-    alarm['timestamp_jst'] = alarm['timestamp'].astimezone(jst)
+    
     
     st.markdown(f"""
+    alarm['timestamp_jst'] = alarm['timestamp'].astimezone(jst)
     <div class="alert-card">
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <div>
